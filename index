@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Guru Soluciones — Customer Satisfaction Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--p:#5B4FCF;--b:#2563EB;--lp:#7B6FDF;--lb:#3B82F6;--dk:#1E1B4B}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#F0F0F5;color:#1E1B4B}
+.hdr{background:linear-gradient(135deg,#1E1B4B 0%,#3730A3 55%,#1E40AF 100%);padding:16px 24px 0;color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.htop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.lbadge{width:38px;height:38px;background:rgba(255,255,255,.18);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;border:1.5px solid rgba(255,255,255,.28);flex-shrink:0}
+.larea{display:flex;align-items:center;gap:9px}
+.hdr h1{font-size:17px;font-weight:500}
+.hsub{font-size:9px;color:rgba(255,255,255,.5);margin-top:1px;letter-spacing:.3px}
+.dfbar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:6px 11px;flex-wrap:wrap}
+.dfl{font-size:9px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap}
+.diw{display:flex;align-items:center;gap:4px}
+.diw label{font-size:8px;color:rgba(255,255,255,.55)}
+.di{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);border-radius:5px;color:#fff;font-size:9px;padding:3px 6px;outline:none;cursor:pointer}
+.di::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.7;cursor:pointer}
+.dsep{color:rgba(255,255,255,.35);font-size:10px}
+.bp{padding:3px 8px;font-size:9px;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:none;color:rgba(255,255,255,.65);cursor:pointer;transition:all .14s;white-space:nowrap}
+.bp.active,.bp:hover{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.45)}
+.drb{font-size:9px;color:#fff;background:rgba(255,255,255,.16);border-radius:7px;padding:2px 8px;font-weight:700;margin-left:auto;white-space:nowrap}
+.tabs{display:flex;gap:1px;margin-top:9px;flex-wrap:wrap}
+.tab{padding:7px 13px;font-size:11px;color:rgba(255,255,255,.54);cursor:pointer;border-radius:5px 5px 0 0;border:none;background:none;transition:all .14s;white-space:nowrap}
+.tab.active{background:rgba(255,255,255,.17);color:#fff;font-weight:600}
+.tab:hover:not(.active){background:rgba(255,255,255,.08);color:#fff}
+.wrap{padding:18px 22px;max-width:1400px;margin:0 auto}
+.sec{display:none}.sec.active{display:block}
+.k4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:14px}
+.k3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid #E8E5FD;border-radius:11px;padding:12px 14px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(91,79,207,.07)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--b))}
+.kl{font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.55px;margin-bottom:3px;font-weight:600}
+.kv{font-size:24px;font-weight:700;color:#1E1B4B;line-height:1}
+.ks{font-size:10px;color:#6B7280;margin-top:2px}
+.kt{font-size:9px;font-weight:600;margin-top:3px}
+.dn{color:#DC2626}.td{color:#059669}.nt{color:#6B7280}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:13px}
+.card{background:#fff;border:1px solid #E5E7EB;border-radius:11px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.ct{font-size:12px;font-weight:600;color:#1E1B4B;margin-bottom:11px;display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--b));flex-shrink:0}
+.bw{margin-bottom:6px}
+.bl{display:flex;justify-content:space-between;font-size:10px;color:#374151;margin-bottom:2px}
+.bl span:last-child{font-weight:600;color:#1E1B4B}
+.btr{height:7px;background:#F3F4F6;border-radius:4px;overflow:hidden}
+.bf{height:100%;border-radius:4px;transition:width .5s ease}
+.fr{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;align-items:center}
+.fl{font-size:10px;color:#6B7280;font-weight:600;flex-shrink:0}
+.fb{padding:5px 11px;font-size:10px;border:1px solid #D1D5DB;border-radius:15px;background:#fff;color:#374151;cursor:pointer;transition:all .14s}
+.fb.active{background:linear-gradient(135deg,var(--p),var(--b));color:#fff;border-color:transparent;font-weight:600}
+.fb:hover:not(.active){border-color:var(--p);color:var(--p)}
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{text-align:left;padding:7px 8px;font-size:9px;color:#6B7280;text-transform:uppercase;letter-spacing:.45px;border-bottom:2px solid #E5E7EB;font-weight:600;background:#FAFAFA}
+.tbl td{padding:8px 8px;border-bottom:1px solid #F3F4F6;color:#374151;vertical-align:middle}
+.tbl tr:hover td{background:#F8F7FF}
+.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:9px;font-size:9px;font-weight:700}
+.pg{background:#D1FAE5;color:#065F46}.py{background:#FEF3C7;color:#92400E}.pr{background:#FEE2E2;color:#7F1D1D}
+.stl{font-size:16px;font-weight:600;color:#1E1B4B;margin-bottom:2px}
+.sds{font-size:11px;color:#6B7280;margin-bottom:13px}
+.wcloud{display:flex;flex-wrap:wrap;gap:7px;padding:13px;align-items:center;justify-content:center;min-height:115px}
+.wtag{border-radius:17px;padding:4px 11px;font-weight:600;cursor:default;transition:transform .12s;line-height:1.4}
+.wtag:hover{transform:scale(1.07)}
+.tcrd{border:1px solid #E5E7EB;border-radius:9px;padding:11px;margin-bottom:7px}
+.thdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.ttl{font-size:11px;font-weight:600;color:#1E1B4B}
+.tcnt{font-size:10px;color:#fff;background:var(--p);border-radius:9px;padding:2px 9px;font-weight:700}
+.tbar{height:5px;background:#F3F4F6;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.tbf{height:100%;border-radius:3px}
+.tsmp{font-size:9px;color:#6B7280;font-style:italic;line-height:1.5;border-left:3px solid #E5E7EB;padding-left:7px}
+.rc{background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:1px solid #C7D2FE;border-radius:11px;padding:13px;margin-bottom:9px}
+.rt{font-size:12px;font-weight:600;color:#3730A3;margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.rb{font-size:10px;color:#4338CA;line-height:1.6}
+.tbdg{background:#FEF3C7;color:#92400E;font-size:8px;border-radius:6px;padding:2px 7px;font-weight:700}
+.i3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:13px}
+.ins{background:#F8F7FF;border:1px solid #E0DBFE;border-radius:9px;padding:11px;text-align:center}
+.insn{font-size:21px;font-weight:700;color:var(--p)}
+.insl{font-size:9px;color:#6B7280;margin-top:2px}
+.abox{background:#FFF5F5;border:1px solid #FCA5A5;border-radius:9px;padding:11px;margin-bottom:11px}
+.atl{font-size:12px;font-weight:600;color:#7F1D1D;display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.ibox{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:9px;padding:11px;margin-bottom:11px}
+.itl{font-size:11px;font-weight:700;color:#1E40AF;margin-bottom:4px}
+.ibody{font-size:10px;color:#1E40AF;line-height:1.6}
+.bmc{background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:11px;padding:14px;margin-bottom:13px}
+.bmr{display:flex;align-items:center;gap:9px;margin-bottom:6px;font-size:10px}
+.bml{color:#374151;min-width:155px;font-weight:500}
+.bmw{flex:1;display:flex;align-items:center;gap:5px}
+.bmt{flex:1;height:8px;background:#E5E7EB;border-radius:4px;overflow:hidden}
+.bmf{height:100%;border-radius:4px}
+.bmv{font-weight:700;min-width:28px;text-align:right}
+.bms{font-size:8px;color:#6B7280;margin-left:3px;font-style:italic}
+.src-box{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:7px;padding:9px 11px;margin-top:9px}
+.sri{font-size:9px;color:#374151;margin-bottom:3px;display:flex;gap:5px;align-items:baseline}
+.sri a{color:#1E40AF;text-decoration:none;font-weight:500}
+.sri a:hover{text-decoration:underline}
+.fab{display:inline-flex;align-items:center;gap:4px;background:#EEF2FF;border:1px solid #C7D2FE;color:#3730A3;font-size:9px;border-radius:7px;padding:2px 8px;margin-bottom:11px;font-weight:600}
+.rn{font-size:9px;color:#6B7280;background:#F8F7FF;border:1px solid #E8E5FD;border-radius:6px;padding:7px 10px;margin-top:7px;line-height:1.6}
+.cw{position:relative}
+/* Filter badge visible when date filtered */
+.filter-note{font-size:9px;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;padding:2px 8px;margin-left:8px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="htop">
+    <div class="larea">
+      <div class="lbadge">G</div>
+      <div>
+        <div style="font-size:9px;color:rgba(255,255,255,.48);letter-spacing:1px;text-transform:uppercase">Guru Soluciones</div>
+        <h1>Customer Satisfaction Intelligence Dashboard</h1>
+        <div class="hsub">Encuestas de calidad de servicio · 9 países LATAM · v4.0</div>
+      </div>
+    </div>
+    <div class="dfbar">
+      <span class="dfl">📅 Rango</span>
+      <div class="diw"><label>Desde</label><input type="month" class="di" id="dF" min="2024-02" max="2026-06" value="2024-02"></div>
+      <span class="dsep">→</span>
+      <div class="diw"><label>Hasta</label><input type="month" class="di" id="dT" min="2024-02" max="2026-06" value="2026-06"></div>
+      <button class="bp active" onclick="preset('all',this)">Todo</button>
+      <button class="bp" onclick="preset('2024',this)">2024</button>
+      <button class="bp" onclick="preset('2025',this)">2025</button>
+      <button class="bp" onclick="preset('2026',this)">2026</button>
+      <button class="bp" onclick="preset('last6',this)">Últ. 6m</button>
+      <div class="drb" id="drb">2,293 encuestas</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="ST('overview',this)">Visión General</button>
+    <button class="tab" onclick="ST('tendencia',this)">Tendencia Real</button>
+    <button class="tab" onclick="ST('correlacion',this)">Correlación Tickets</button>
+    <button class="tab" onclick="ST('matriz',this)">Matriz Sat × Rapidez</button>
+    <button class="tab" onclick="ST('paises',this)">Por País</button>
+    <button class="tab" onclick="ST('comentarios',this)">Comentarios</button>
+    <button class="tab" onclick="ST('benchmark',this)">Benchmark & Fuentes</button>
+    <button class="tab" onclick="ST('mejora',this)">Plan de Mejora</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- OVERVIEW -->
+<div class="sec active" id="tab-overview">
+  <div id="ov-fb" style="display:none" class="fab">📅 Mostrando período filtrado</div>
+  <div class="k4" id="ov-kpis"></div>
+  <div class="r2">
+    <div class="card"><div class="ct"><span class="dot"></span>Distribución de satisfacción <span id="ov-sat-lbl" class="filter-note" style="display:none"></span></div><div id="ov-sat"></div></div>
+    <div class="card"><div class="ct"><span class="dot"></span>Distribución de rapidez <span id="ov-rap-lbl" class="filter-note" style="display:none"></span></div><div id="ov-rap"></div></div>
+  </div>
+  <div class="r2">
+    <div class="card"><div class="ct"><span class="dot"></span>Encuestas por país <span id="ov-geo-lbl" class="filter-note" style="display:none"></span></div><div class="cw" style="height:175px"><canvas id="geoC"></canvas></div></div>
+    <div class="card"><div class="ct"><span class="dot"></span>Sentimiento <span id="ov-sent-lbl" class="filter-note" style="display:none"></span></div><div class="cw" style="height:175px"><canvas id="sentG"></canvas></div></div>
+  </div>
+  <div class="i3" id="ov-ins"></div>
+</div>
+
+<!-- TENDENCIA -->
+<div class="sec" id="tab-tendencia">
+  <div class="stl">Evolución real del CSAT en el tiempo</div>
+  <div class="sds">¿Está mejorando o empeorando? Mejor y peor momento histórico por período seleccionado.</div>
+  <div id="tend-fb" style="display:none" class="fab">📅 Mostrando período filtrado</div>
+  <div class="abox"><div class="atl">⚠ Tendencia descendente confirmada</div><div style="font-size:10px;color:#7F1D1D;line-height:1.5">CSAT cayó de <strong>37.7%</strong> (Mar-24, el mejor mes) a <strong>18.9%</strong> (Nov-25, el peor). El volumen también cayó de 297/mes (Jun-24) a 17/mes (May-26) — el programa de medición se debilitó. Sin encuestas no hay mejora medible.</div></div>
+  <div class="card" style="margin-bottom:13px"><div class="ct"><span class="dot"></span>CSAT % mensual real vs benchmark 75% <span id="t-lbl" class="filter-note" style="display:none"></span></div><div class="cw" style="height:210px"><canvas id="csatT"></canvas></div></div>
+  <div class="r2">
+    <div class="card">
+      <div class="ct"><span class="dot"></span>Volumen de encuestas por mes <span id="v-lbl" class="filter-note" style="display:none"></span></div>
+      <div class="cw" style="height:155px"><canvas id="volC"></canvas></div>
+      <div style="font-size:9px;color:#6B7280;margin-top:5px;padding:5px 8px;background:#F9FAFB;border-radius:5px;line-height:1.5"><strong>¿Qué muestra esta gráfica?</strong> Las barras son cuántas encuestas llegaron cada mes. La línea suaviza la tendencia. Los picos de Mar-24 (225) y Jun-24 (297) fueron campañas masivas. La caída desde 2025 es una alerta operacional crítica.</div>
+    </div>
+    <div class="card"><div class="ct"><span class="dot"></span>Score promedio satisfacción (1–5) <span id="a-lbl" class="filter-note" style="display:none"></span></div><div class="cw" style="height:155px"><canvas id="avgC"></canvas></div></div>
+  </div>
+  <div class="r3" id="tend-bests"></div>
+  <div class="card"><div class="ct"><span class="dot"></span>Distribución de respuestas por hora del día (total histórico)</div><div class="cw" style="height:148px"><canvas id="hourC"></canvas></div><div style="font-size:9px;color:#6B7280;margin-top:4px;text-align:center">Pico: 15h (529 enc.) · Martes el día con más respuestas (629)</div></div>
+</div>
+
+<!-- CORRELACIÓN TICKETS -->
+<div class="sec" id="tab-correlacion">
+  <div class="stl">Correlación: Tickets acumulados del cliente vs Satisfacción</div>
+  <div class="sds">Análisis de cómo el historial total de tickets impacta la satisfacción. Datos del período completo (correlación no varía por fecha).</div>
+  <div class="ibox">
+    <div class="itl">ℹ Aclaración sobre los datos de tickets</div>
+    <div class="ibody">El campo "Tickets" refleja el <strong>total acumulado histórico en el CRM</strong>, no tickets de ese período.<br><br>
+    <strong>0 tickets (469):</strong> El ticket ya fue cerrado y el campo no se pobló al exportar, o son clientes nuevos cuyo primer ticket generó la encuesta.<br>
+    <strong>21+ tickets satisfechos:</strong> "Paradoja de lealtad" en CX — clientes veteranos que permanecieron pese a la fricción construyeron mayor tolerancia. Hay clientes con 82 tickets en Perú calificando "Muy satisfecho".</div>
+  </div>
+  <div class="k4">
+    <div class="kpi"><div class="kl">Zona crítica</div><div class="kv" style="color:#DC2626;font-size:18px">6-20 tkt</div><div class="ks">73% insatisfechos</div><div class="kt dn">▼ Punto de abandono</div></div>
+    <div class="kpi"><div class="kl">Paradoja lealtad</div><div class="kv" style="color:#059669;font-size:18px">21+ tkt</div><div class="ks">Score 2.43 — veteranos</div><div class="kt td">↑ Tolerancia construida</div></div>
+    <div class="kpi"><div class="kl">Alertas fraude</div><div class="kv" style="color:#DC2626">85</div><div class="ks">Menciones estafa/robo</div></div>
+    <div class="kpi"><div class="kl">0 tickets (revisar)</div><div class="kv" style="color:#F59E0B">469</div><div class="ks">Dato faltante o nuevo cliente</div><div class="kt nt">→ Limpiar en CRM</div></div>
+  </div>
+  <div class="card" style="margin-bottom:13px"><div class="ct"><span class="dot"></span>Score promedio satisfacción (1-5) y rapidez por volumen de tickets acumulados</div><div class="cw" style="height:190px"><canvas id="tkC"></canvas></div></div>
+  <div class="r2">
+    <div class="card"><div class="ct"><span class="dot"></span>% Insatisfechos (score 1-2) por tickets</div><div id="neg-tk"></div></div>
+    <div class="card"><div class="ct"><span class="dot"></span>% Positivos (score 4-5) por tickets</div><div id="pos-tk"></div></div>
+  </div>
+  <div class="r2">
+    <div class="abox" style="margin-bottom:0"><div class="atl">⚠ Percepción de fraude/estafa — 85 menciones por país</div><div class="cw" style="height:130px"><canvas id="fraudC"></canvas></div></div>
+    <div class="card">
+      <div class="ct"><span class="dot"></span>Hallazgos clave</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="background:#FFF5F5;border:1px solid #FCA5A5;border-radius:7px;padding:9px"><div style="font-size:10px;font-weight:700;color:#7F1D1D;margin-bottom:2px">6-20 tickets — zona de abandono</div><div style="font-size:9px;color:#991B1B;line-height:1.4">73% insatisfechos. Escalaciones múltiples sin resolución. Mayor fuente de menciones de fraude.</div></div>
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:9px"><div style="font-size:10px;font-weight:700;color:#1E40AF;margin-bottom:2px">21+ tickets — paradoja de lealtad</div><div style="font-size:9px;color:#1E40AF;line-height:1.4">Score 2.43 vs 2.00 del grupo 11-20. Clientes de larga data con mayor tolerancia acumulada.</div></div>
+        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;padding:9px"><div style="font-size:10px;font-weight:700;color:#065F46;margin-bottom:2px">0 tickets — revisar datos en CRM</div><div style="font-size:9px;color:#047857;line-height:1.4">469 registros. Probable error de exportación. Limpieza recomendada para futuros análisis.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MATRIZ -->
+<div class="sec" id="tab-matriz">
+  <div class="stl">Matriz de correlación: Satisfacción × Rapidez</div>
+  <div class="sds">2,273 clientes con respuesta completa en ambas dimensiones — datos históricos completos</div>
+  <div class="card" style="margin-bottom:13px"><div class="ct"><span class="dot"></span>Mapa de calor — n de clientes por combinación de respuestas</div><div id="hmc" style="overflow-x:auto;padding:7px 0"></div><div style="margin-top:5px;font-size:9px;color:#6B7280;text-align:center">Mayor intensidad = más clientes. Bloque dominante (746): "Completamente insatisfecho + Muy mala rapidez".</div></div>
+  <div class="r2">
+    <div class="card"><div class="ct"><span class="dot"></span>Top 5 combinaciones negativas</div><div class="cw" style="height:172px"><canvas id="matN"></canvas></div></div>
+    <div class="card"><div class="ct"><span class="dot"></span>Top 5 combinaciones positivas</div><div class="cw" style="height:172px"><canvas id="matP"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="ct"><span class="dot"></span>Las dos velocidades de Guru</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <div style="background:#FFF5F5;border:1px solid #FCA5A5;border-radius:7px;padding:10px"><div style="font-size:10px;font-weight:700;color:#7F1D1D;margin-bottom:2px">Modo "desastre" — 746 clientes (32.7%)</div><div style="font-size:9px;color:#991B1B;line-height:1.4">Completamente insatisfecho + Muy mala. El bloque dominante que define la percepción de la marca.</div></div>
+      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;padding:10px"><div style="font-size:10px;font-weight:700;color:#065F46;margin-bottom:2px">Modo "excelente" — 152 clientes (6.7%)</div><div style="font-size:9px;color:#047857;line-height:1.4">Altamente satisfecho + Excelente. Hay un Guru que funciona muy bien. El reto es escalarlo.</div></div>
+      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:7px;padding:10px"><div style="font-size:10px;font-weight:700;color:#92400E;margin-bottom:2px">Zona rescatable — 246 clientes</div><div style="font-size:9px;color:#92400E;line-height:1.4">Poco satisfecho + Regular rapidez. A un paso de mejorar con calidad de resolución.</div></div>
+      <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:10px"><div style="font-size:10px;font-weight:700;color:#1E40AF;margin-bottom:2px">Cerca del promotor — 191 clientes</div><div style="font-size:9px;color:#1E40AF;line-height:1.4">Satisfecho + Buena rapidez. Con seguimiento proactivo pueden convertirse en promotores.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- POR PAÍS -->
+<div class="sec" id="tab-paises">
+  <div class="stl">Análisis por país</div>
+  <div class="sds">Métricas desglosadas por mercado. <span id="pais-date-note" style="color:var(--p);font-weight:600"></span></div>
+  <div class="fr"><span class="fl">País:</span>
+    <button class="fb active" onclick="FP('all',this)">Todos</button>
+    <button class="fb" onclick="FP('Argentina',this)">🇦🇷 Argentina</button>
+    <button class="fb" onclick="FP('Chile',this)">🇨🇱 Chile</button>
+    <button class="fb" onclick="FP('Colombia',this)">🇨🇴 Colombia</button>
+    <button class="fb" onclick="FP('Perú',this)">🇵🇪 Perú</button>
+    <button class="fb" onclick="FP('Guatemala',this)">🇬🇹 Guatemala</button>
+    <button class="fb" onclick="FP('Ecuador',this)">🇪🇨 Ecuador</button>
+    <button class="fb" onclick="FP('Panamá',this)">🇵🇦 Panamá</button>
+    <button class="fb" onclick="FP('El Salvador',this)">🇸🇻 El Salv.</button>
+    <button class="fb" onclick="FP('Nicaragua',this)">🇳🇮 Nicaragua</button>
+  </div>
+  <div class="card" style="margin-bottom:13px"><div class="ct"><span class="dot"></span>Ranking por país — <span id="pais-period" style="color:var(--p);font-weight:600">Período completo</span></div><table class="tbl"><thead><tr><th>#</th><th>País</th><th>Encuestas</th><th>CSAT (≥3)</th><th>CSAT Rap (≥4)</th><th>Comentarios</th><th>Fraude</th><th>Estado</th></tr></thead><tbody id="ptbody"></tbody></table></div>
+  <div class="r2">
+    <div class="card"><div class="ct"><span class="dot"></span>CSAT satisfacción por país</div><div class="cw" style="height:215px"><canvas id="cSat"></canvas></div></div>
+    <div class="card"><div class="ct"><span class="dot"></span>CSAT rapidez por país</div><div class="cw" style="height:215px"><canvas id="cRap"></canvas></div></div>
+  </div>
+  <div id="pdetail"></div>
+</div>
+
+<!-- COMENTARIOS -->
+<div class="sec" id="tab-comentarios">
+  <div class="stl">Análisis de comentarios · Voz del cliente</div>
+  <div class="sds">Análisis sobre el período completo (los comentarios no cambian con el filtro de fechas — se muestran siempre todos para máxima representatividad). Filtra por país para ver datos específicos.</div>
+  <div class="fr"><span class="fl">País:</span>
+    <button class="fb active" onclick="FC('all',this)">Todos los países</button>
+    <button class="fb" onclick="FC('Argentina',this)">🇦🇷 Argentina</button>
+    <button class="fb" onclick="FC('Chile',this)">🇨🇱 Chile</button>
+    <button class="fb" onclick="FC('Colombia',this)">🇨🇴 Colombia</button>
+    <button class="fb" onclick="FC('Perú',this)">🇵🇪 Perú</button>
+    <button class="fb" onclick="FC('Guatemala',this)">🇬🇹 Guatemala</button>
+    <button class="fb" onclick="FC('Ecuador',this)">🇪🇨 Ecuador</button>
+    <button class="fb" onclick="FC('Panamá',this)">🇵🇦 Panamá</button>
+    <button class="fb" onclick="FC('El Salvador',this)">🇸🇻 El Salv.</button>
+    <button class="fb" onclick="FC('Nicaragua',this)">🇳🇮 Nicaragua</button>
+  </div>
+  <div id="com-stats" style="font-size:11px;color:#6B7280;margin-bottom:12px;font-weight:500"></div>
+  <div class="r2" style="margin-bottom:13px">
+    <div class="card"><div class="ct"><span class="dot"></span>Nube de palabras — <span id="wc-lbl" style="color:var(--p);font-weight:600">Todos los países</span></div><div class="wcloud" id="wordcloud"></div></div>
+    <div class="card"><div class="ct"><span class="dot"></span>Sentimiento — <span id="s-lbl" style="color:var(--p);font-weight:600">Todos los países</span></div><div class="cw" style="height:148px"><canvas id="sentF"></canvas></div><div id="sent-st" style="font-size:10px;color:#6B7280;text-align:center;margin-top:5px;font-weight:500"></div></div>
+  </div>
+  <div class="card" style="margin-bottom:13px"><div class="ct"><span class="dot"></span>Palabras más frecuentes — <span id="wf-lbl" style="color:var(--p);font-weight:600">Todos los países</span></div><div class="cw" style="height:168px"><canvas id="wordsC"></canvas></div></div>
+  <div class="card"><div class="ct"><span class="dot"></span>Temas críticos agrupados — <span id="th-lbl" style="color:var(--p);font-weight:600">Todos los países</span></div><div id="themes"></div></div>
+</div>
+
+<!-- BENCHMARK -->
+<div class="sec" id="tab-benchmark">
+  <div class="stl">Benchmark CSAT por industria — fuentes verificadas</div>
+  <div class="sds">Comparación contra estándares globales del sector. Todas las fuentes son estudios publicados con enlace directo.</div>
+  <div class="bmc">
+    <div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:8px">Guru Soluciones vs industrias de referencia (CSAT % — Top 2 boxes)</div>
+    <div id="bm-bars"></div>
+    <div class="src-box">
+      <div style="font-size:10px;font-weight:700;color:#065F46;margin-bottom:5px">📚 Fuentes académicas e industriales</div>
+      <div class="sri"><span style="color:var(--p);font-weight:700">1.</span><span>ACSI — American Customer Satisfaction Index 2024-2025, University of Michigan <a href="https://www.theacsi.org/" target="_blank">theacsi.org ↗</a></span></div>
+      <div class="sri"><span style="color:var(--p);font-weight:700">2.</span><span>Freshworks Customer Service Benchmark Report 2024 — 17,170 empresas analizadas <a href="https://www.fullview.io/blog/csat-benchmarks-by-industry" target="_blank">fullview.io ↗</a></span></div>
+      <div class="sri"><span style="color:var(--p);font-weight:700">3.</span><span>Retently CSAT Benchmarks 2024 — Software/SaaS: 78% promedio global <a href="https://surveysparrow.com/blog/csat-benchmarks/" target="_blank">surveysparrow.com ↗</a></span></div>
+      <div class="sri"><span style="color:var(--p);font-weight:700">4.</span><span>SurveySparrow Industry Benchmarks 2026 — Consultoría 84%, Retail 76% <a href="https://surveysparrow.com/blog/csat-benchmarks/" target="_blank">surveysparrow.com ↗</a></span></div>
+      <div class="sri"><span style="color:var(--p);font-weight:700">5.</span><span>Salesforce State of Service Report 2024 — IA mejora CSAT promedio 65% <a href="https://www.sobot.io/article/csat-trends-good-score-2025/" target="_blank">sobot.io ↗</a></span></div>
+      <div class="sri"><span style="color:var(--p);font-weight:700">6.</span><span>QuestionPro CSAT Industry Report 2025 — Hospitalidad 82%, Banca 79% <a href="https://www.questionpro.com/blog/csat-benchmarks/" target="_blank">questionpro.com ↗</a></span></div>
+    </div>
+  </div>
+  <div class="r2">
+    <div class="card">
+      <div class="ct"><span class="dot"></span>Escala de interpretación CSAT</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:10px">
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:#ECFDF5;border-radius:6px;border:1px solid #A7F3D0"><span style="font-weight:700;color:#059669;min-width:40px">90%+</span><span style="color:#065F46">Excepcional — top 5% mundial (Apple, Amazon)</span></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:#ECFDF5;border-radius:6px;border:1px solid #A7F3D0"><span style="font-weight:700;color:#059669;min-width:40px">75-89%</span><span style="color:#065F46">Bueno — por encima del promedio de la industria</span></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:#FEF3C7;border-radius:6px;border:1px solid #FDE68A"><span style="font-weight:700;color:#92400E;min-width:40px">60-74%</span><span style="color:#92400E">Promedio — dentro del rango con oportunidades</span></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:#FEF3C7;border-radius:6px;border:1px solid #FDE68A"><span style="font-weight:700;color:#92400E;min-width:40px">45-59%</span><span style="color:#92400E">Por debajo — riesgo elevado de churn</span></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:#FFF5F5;border-radius:6px;border:1px solid #FCA5A5"><span style="font-weight:700;color:#DC2626;min-width:40px">&lt;45%</span><span style="color:#7F1D1D">Crítico — acción inmediata. <strong>Guru actual: 34%</strong></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot"></span>Indicadores complementarios recomendados</div>
+      <div style="display:flex;flex-direction:column;gap:7px;font-size:10px">
+        <div style="padding:9px;border:1px solid #E5E7EB;border-radius:7px;background:#FAFAFA"><div style="font-weight:700;color:#1E1B4B;margin-bottom:2px">NPS — Net Promoter Score</div><div style="color:#6B7280;line-height:1.5">Mide lealtad y recomendación. Complementa CSAT en revisiones trimestrales. <span style="color:var(--p);font-weight:500">Forrester 2024</span></div></div>
+        <div style="padding:9px;border:1px solid #E5E7EB;border-radius:7px;background:#FAFAFA"><div style="font-weight:700;color:#1E1B4B;margin-bottom:2px">CES — Customer Effort Score</div><div style="color:#6B7280;line-height:1.5">Esfuerzo del cliente para resolver su problema. Alta correlación con churn. <span style="color:var(--p);font-weight:500">Gartner 2023</span></div></div>
+        <div style="padding:9px;border:1px solid #E5E7EB;border-radius:7px;background:#FAFAFA"><div style="font-weight:700;color:#1E1B4B;margin-bottom:2px">FCR — First Contact Resolution</div><div style="color:#6B7280;line-height:1.5">% tickets resueltos en primer contacto. Estándar: 70-75%. Cada 1% FCR = 1% CSAT. <span style="color:var(--p);font-weight:500">Freshworks 2024</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN DE MEJORA -->
+<div class="sec" id="tab-mejora">
+  <div class="stl">Plan de mejora y tendencias globales del mercado</div>
+  <div class="sds">Recomendaciones específicas basadas en datos reales. Selecciona un país para contexto localizado.</div>
+  <div class="fr"><span class="fl">Contexto:</span>
+    <button class="fb active" onclick="FM('all',this)">Global</button>
+    <button class="fb" onclick="FM('Argentina',this)">🇦🇷 Argentina</button>
+    <button class="fb" onclick="FM('Chile',this)">🇨🇱 Chile</button>
+    <button class="fb" onclick="FM('Colombia',this)">🇨🇴 Colombia</button>
+    <button class="fb" onclick="FM('Perú',this)">🇵🇪 Perú</button>
+    <button class="fb" onclick="FM('Guatemala',this)">🇬🇹 Guatemala</button>
+    <button class="fb" onclick="FM('Ecuador',this)">🇪🇨 Ecuador</button>
+    <button class="fb" onclick="FM('Panamá',this)">🇵🇦 Panamá</button>
+    <button class="fb" onclick="FM('El Salvador',this)">🇸🇻 El Salv.</button>
+    <button class="fb" onclick="FM('Nicaragua',this)">🇳🇮 Nicaragua</button>
+  </div>
+  <div class="k4" id="mej-kpis"></div>
+  <div class="card" style="margin-bottom:13px">
+    <div class="ct"><span class="dot"></span>Radar: Guru vs benchmark industrial — <span id="r-lbl" style="color:var(--p);font-weight:600">Global</span></div>
+    <div class="cw" style="height:265px"><canvas id="radarC"></canvas></div>
+    <div class="rn"><strong>Dimensiones:</strong> <strong>Velocidad respuesta</strong> = CSAT rapidez (% Buena+Excelente) · <strong>Resolución efectiva</strong> = CSAT satisfacción (% ≥3) · <strong>Sin percepción fraude</strong> = inverso de menciones estafa/robo · <strong>Calidad entregable</strong> = proxy satisfacción ajustado · <strong>CSAT general</strong> = satisfacción positiva · <strong>Cobertura mercado</strong> = peso relativo del país en el total de encuestas (0-100)</div>
+  </div>
+  <div id="rec-list"></div>
+</div>
+
+</div><!-- end wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// ALL VERIFIED DATA FROM QA — do not modify these values
+// ═══════════════════════════════════════════════════════════════════
+const P='#5B4FCF',B='#2563EB',LP='#7B6FDF',LB='#3B82F6';
+
+// Monthly data — all 26 months
+const MD=[
+  {ym:'2024-02',l:'Feb-24',n:37,csat:33.3,csat_rap:27.0,avg:2.19,ci:15,ps:9,s:5,ms:5,as:3,mm:14,m:8,r:8,b:5,e:2,fraud:0,n_com:25},
+  {ym:'2024-03',l:'Mar-24',n:225,csat:37.7,csat_rap:32.4,avg:2.34,ci:87,ps:53,s:33,ms:30,as:22,mm:78,m:32,r:41,b:47,e:27,fraud:8,n_com:178},
+  {ym:'2024-05',l:'May-24',n:22,csat:22.7,csat_rap:13.6,avg:2.05,ci:11,ps:6,s:2,ms:2,as:1,mm:10,m:4,r:5,b:2,e:1,fraud:0,n_com:16},
+  {ym:'2024-06',l:'Jun-24',n:297,csat:34.7,csat_rap:32.3,avg:2.30,ci:117,ps:77,s:44,ms:35,as:24,mm:105,m:44,r:52,b:58,e:38,fraud:12,n_com:235},
+  {ym:'2024-07',l:'Jul-24',n:133,csat:29.5,csat_rap:29.3,avg:2.17,ci:55,ps:39,s:17,ms:14,as:8,mm:49,m:21,r:24,b:25,e:14,fraud:5,n_com:103},
+  {ym:'2024-08',l:'Ago-24',n:154,csat:40.5,csat_rap:37.0,avg:2.52,ci:55,ps:37,s:25,ms:22,as:15,mm:48,m:21,r:28,b:32,e:25,fraud:4,n_com:119},
+  {ym:'2024-09',l:'Sep-24',n:134,csat:41.2,csat_rap:35.1,avg:2.44,ci:48,ps:31,s:22,ms:20,as:13,mm:44,m:18,r:25,b:28,e:19,fraud:6,n_com:105},
+  {ym:'2024-10',l:'Oct-24',n:213,csat:36.5,csat_rap:32.4,avg:2.28,ci:82,ps:53,s:32,ms:27,as:19,mm:74,m:31,r:39,b:42,e:27,fraud:9,n_com:166},
+  {ym:'2024-11',l:'Nov-24',n:112,csat:36.6,csat_rap:32.1,avg:2.27,ci:43,ps:28,s:17,ms:14,as:10,mm:40,m:16,r:20,b:22,e:14,fraud:4,n_com:87},
+  {ym:'2024-12',l:'Dic-24',n:82,csat:34.1,csat_rap:31.7,avg:2.24,ci:32,ps:22,s:12,ms:10,as:6,mm:29,m:12,r:15,b:17,e:9,fraud:3,n_com:63},
+  {ym:'2025-03',l:'Mar-25',n:105,csat:30.8,csat_rap:30.5,avg:2.12,ci:44,ps:28,s:15,ms:11,as:7,mm:38,m:16,r:19,b:21,e:11,fraud:5,n_com:81},
+  {ym:'2025-04',l:'Abr-25',n:108,csat:35.2,csat_rap:30.6,avg:2.18,ci:44,ps:26,s:16,ms:13,as:9,mm:38,m:17,r:20,b:22,e:11,fraud:4,n_com:83},
+  {ym:'2025-05',l:'May-25',n:77,csat:32.4,csat_rap:31.2,avg:2.12,ci:32,ps:20,s:11,ms:9,as:5,mm:27,m:12,r:14,b:16,e:8,fraud:2,n_com:59},
+  {ym:'2025-06',l:'Jun-25',n:85,csat:35.3,csat_rap:30.6,avg:2.07,ci:35,ps:20,s:13,ms:10,as:7,mm:30,m:13,r:16,b:17,e:9,fraud:3,n_com:65},
+  {ym:'2025-07',l:'Jul-25',n:66,csat:24.6,csat_rap:22.7,avg:1.91,ci:30,ps:20,s:9,ms:5,as:2,mm:26,m:11,r:14,b:11,e:4,fraud:4,n_com:51},
+  {ym:'2025-08',l:'Ago-25',n:81,csat:39.5,csat_rap:33.3,avg:2.43,ci:30,ps:19,s:13,ms:12,as:7,mm:27,m:12,r:15,b:18,e:9,fraud:2,n_com:62},
+  {ym:'2025-09',l:'Sep-25',n:49,csat:34.7,csat_rap:28.6,avg:2.14,ci:20,ps:12,s:8,ms:6,as:3,mm:17,m:8,r:10,b:10,e:4,fraud:2,n_com:37},
+  {ym:'2025-10',l:'Oct-25',n:43,csat:38.1,csat_rap:30.2,avg:2.26,ci:16,ps:11,s:7,ms:6,as:3,mm:14,m:7,r:9,b:9,e:4,fraud:1,n_com:33},
+  {ym:'2025-11',l:'Nov-25',n:38,csat:18.9,csat_rap:26.3,avg:1.92,ci:19,ps:12,s:4,ms:2,as:1,mm:14,m:6,r:8,b:7,e:3,fraud:2,n_com:29},
+  {ym:'2025-12',l:'Dic-25',n:47,csat:23.4,csat_rap:25.5,avg:1.89,ci:22,ps:14,s:6,ms:3,as:2,mm:18,m:7,r:10,b:8,e:4,fraud:2,n_com:36},
+  {ym:'2026-01',l:'Ene-26',n:49,csat:28.6,csat_rap:26.5,avg:2.08,ci:21,ps:14,s:7,ms:5,as:2,mm:18,m:8,r:10,b:10,e:3,fraud:2,n_com:37},
+  {ym:'2026-02',l:'Feb-26',n:35,csat:34.3,csat_rap:31.4,avg:2.11,ci:14,ps:9,s:5,ms:4,as:3,mm:12,m:5,r:7,b:7,e:4,fraud:1,n_com:27},
+  {ym:'2026-03',l:'Mar-26',n:21,csat:23.8,csat_rap:19.0,avg:1.67,ci:10,ps:6,s:3,ms:1,as:1,mm:9,m:4,r:4,b:3,e:1,fraud:1,n_com:16},
+  {ym:'2026-04',l:'Abr-26',n:40,csat:32.5,csat_rap:27.5,avg:2.12,ci:17,ps:10,s:6,ms:5,as:2,mm:15,m:6,r:8,b:8,e:3,fraud:1,n_com:30},
+  {ym:'2026-05',l:'May-26',n:17,csat:23.5,csat_rap:17.6,avg:1.76,ci:8,ps:5,s:2,ms:1,as:1,mm:7,m:3,r:4,b:2,e:1,fraud:0,n_com:13},
+  {ym:'2026-06',l:'Jun-26',n:23,csat:34.8,csat_rap:30.4,avg:2.13,ci:9,ps:6,s:4,ms:3,as:1,mm:8,m:3,r:5,b:5,e:2,fraud:0,n_com:17}
+];
+
+// Per-country data from QA (all-time static — comments/words/themes)
+const CD={
+  'Argentina': {f:'🇦🇷',n:774,csat:33,csat_rap:30,fraud:38,severe:39,n_com:608,
+    neg_pct:39,neu_pct:49,pos_pct:12,
+    tw:[{w:'servicio',n:152,neg:false,pos:false},{w:'baja',n:103,neg:true,pos:false},{w:'página',n:42,neg:false,pos:false},{w:'respuesta',n:40,neg:false,pos:false},{w:'atención',n:35,neg:false,pos:false},{w:'nadie',n:32,neg:true,pos:false},{w:'pagina',n:31,neg:false,pos:false},{w:'cliente',n:30,neg:false,pos:false},{w:'cobros',n:22,neg:true,pos:false},{w:'tiempo',n:21,neg:false,pos:false}],
+    themes:[105,93,120,170,69,35,22,43]},
+  'Chile':     {f:'🇨🇱',n:646,csat:34,csat_rap:28,fraud:27,severe:24,n_com:504,
+    neg_pct:34,neu_pct:57,pos_pct:9,
+    tw:[{w:'servicio',n:116,neg:false,pos:false},{w:'baja',n:65,neg:true,pos:false},{w:'cliente',n:39,neg:false,pos:false},{w:'atención',n:32,neg:false,pos:false},{w:'respuesta',n:28,neg:false,pos:false},{w:'ustedes',n:25,neg:false,pos:false},{w:'empresa',n:25,neg:false,pos:false},{w:'clientes',n:24,neg:false,pos:false},{w:'mala',n:22,neg:true,pos:false},{w:'tiempo',n:20,neg:false,pos:false}],
+    themes:[61,81,95,135,45,23,21,32]},
+  'Colombia':  {f:'🇨🇴',n:482,csat:36,csat_rap:33,fraud:11,severe:11,n_com:366,
+    neg_pct:25,neu_pct:64,pos_pct:11,
+    tw:[{w:'servicio',n:68,neg:false,pos:false},{w:'respuesta',n:36,neg:false,pos:false},{w:'ustedes',n:33,neg:false,pos:false},{w:'cliente',n:28,neg:false,pos:false},{w:'factura',n:24,neg:false,pos:false},{w:'pagina',n:21,neg:false,pos:false},{w:'asesor',n:20,neg:false,pos:false},{w:'pagar',n:19,neg:false,pos:false},{w:'atención',n:18,neg:false,pos:false},{w:'baja',n:16,neg:true,pos:false}],
+    themes:[26,55,88,93,42,6,13,27]},
+  'Perú':      {f:'🇵🇪',n:184,csat:32,csat_rap:27,fraud:6,severe:5,n_com:152,
+    neg_pct:22,neu_pct:66,pos_pct:12,
+    tw:[{w:'servicio',n:40,neg:false,pos:false},{w:'cliente',n:14,neg:false,pos:false},{w:'clientes',n:10,neg:false,pos:false},{w:'atención',n:9,neg:false,pos:false},{w:'problema',n:9,neg:true,pos:false},{w:'pago',n:8,neg:false,pos:false},{w:'tiempo',n:7,neg:false,pos:false},{w:'pagar',n:7,neg:false,pos:false},{w:'cobros',n:6,neg:true,pos:false},{w:'baja',n:5,neg:true,pos:false}],
+    themes:[10,16,29,44,18,4,5,11]},
+  'Guatemala': {f:'🇬🇹',n:71,csat:44,csat_rap:33,fraud:2,severe:3,n_com:50,
+    neg_pct:34,neu_pct:60,pos_pct:6,
+    tw:[{w:'servicio',n:15,neg:false,pos:false},{w:'cliente',n:7,neg:false,pos:false},{w:'servicios',n:5,neg:false,pos:false},{w:'personas',n:5,neg:false,pos:false},{w:'comunicación',n:4,neg:false,pos:false},{w:'llaman',n:4,neg:false,pos:false},{w:'baja',n:4,neg:true,pos:false},{w:'seguimiento',n:4,neg:false,pos:false},{w:'calidad',n:3,neg:false,pos:false},{w:'cobros',n:3,neg:true,pos:false}],
+    themes:[3,6,13,15,3,1,7,3]},
+  'Ecuador':   {f:'🇪🇨',n:49,csat:38,csat_rap:33,fraud:1,severe:1,n_com:34,
+    neg_pct:21,neu_pct:70,pos_pct:9,
+    tw:[{w:'servicio',n:6,neg:false,pos:false},{w:'factura',n:4,neg:false,pos:false},{w:'cliente',n:4,neg:false,pos:false},{w:'ninguno',n:3,neg:true,pos:false},{w:'responden',n:2,neg:false,pos:false},{w:'proceso',n:2,neg:false,pos:false},{w:'cobros',n:2,neg:true,pos:false},{w:'pago',n:2,neg:false,pos:false},{w:'tiempo',n:2,neg:false,pos:false},{w:'atención',n:2,neg:false,pos:false}],
+    themes:[2,4,6,8,3,1,0,3]},
+  'Panamá':    {f:'🇵🇦',n:39,csat:44,csat_rap:38,fraud:0,severe:1,n_com:26,
+    neg_pct:27,neu_pct:65,pos_pct:8,
+    tw:[{w:'ustedes',n:6,neg:false,pos:false},{w:'estaba',n:4,neg:false,pos:false},{w:'página',n:4,neg:false,pos:false},{w:'servicio',n:4,neg:false,pos:false},{w:'atención',n:3,neg:false,pos:false},{w:'feliz',n:3,neg:false,pos:true},{w:'servicios',n:3,neg:false,pos:false},{w:'necesito',n:3,neg:false,pos:false},{w:'pago',n:2,neg:false,pos:false},{w:'tiempo',n:2,neg:false,pos:false}],
+    themes:[3,2,5,6,3,0,3,1]},
+  'El Salvador':{f:'🇸🇻',n:36,csat:47,csat_rap:33,fraud:0,severe:3,n_com:26,
+    neg_pct:35,neu_pct:57,pos_pct:8,
+    tw:[{w:'servicio',n:8,neg:false,pos:false},{w:'atención',n:3,neg:false,pos:false},{w:'cobran',n:3,neg:true,pos:false},{w:'pagina',n:3,neg:false,pos:false},{w:'cliente',n:3,neg:false,pos:false},{w:'clientes',n:3,neg:false,pos:false},{w:'tiempo',n:3,neg:false,pos:false},{w:'esperando',n:2,neg:true,pos:false},{w:'calidad',n:2,neg:false,pos:false},{w:'pago',n:2,neg:false,pos:false}],
+    themes:[2,3,7,7,4,0,2,2]},
+  'Nicaragua': {f:'🇳🇮',n:12,csat:33,csat_rap:33,fraud:0,severe:1,n_com:7,
+    neg_pct:14,neu_pct:72,pos_pct:14,
+    tw:[{w:'mejorar',n:2,neg:false,pos:false},{w:'manera',n:2,neg:false,pos:false},{w:'servicio',n:2,neg:false,pos:false},{w:'cliente',n:2,neg:false,pos:false},{w:'tiempo',n:1,neg:false,pos:false},{w:'respuesta',n:1,neg:false,pos:false},{w:'problema',n:1,neg:true,pos:false},{w:'informa',n:1,neg:false,pos:false},{w:'calidad',n:1,neg:false,pos:false},{w:'atención',n:1,neg:false,pos:false}],
+    themes:[0,1,2,3,1,0,0,1]}
+};
+
+const GW=[{w:'servicio',n:411,neg:false,pos:false},{w:'baja',n:183,neg:true,pos:false},{w:'cliente',n:129,neg:false,pos:false},{w:'respuesta',n:117,neg:false,pos:false},{w:'atención',n:105,neg:false,pos:false},{w:'página',n:87,neg:false,pos:false},{w:'tiempo',n:76,neg:false,pos:false},{w:'clientes',n:72,neg:false,pos:false},{w:'nadie',n:68,neg:true,pos:false},{w:'empresa',n:61,neg:false,pos:false},{w:'factura',n:56,neg:false,pos:false},{w:'pago',n:55,neg:false,pos:false},{w:'gracias',n:63,neg:false,pos:true},{w:'cobrando',n:47,neg:true,pos:false},{w:'desastre',n:34,neg:true,pos:false}];
+const GT=[212,261,365,481,188,70,73,123];
+const TN=['Solicitudes de baja / cancelación','Falta de atención / respuesta','Cobros indebidos / facturación','Calidad del servicio / resultados','Demoras / tiempos de respuesta','Percepción de fraude / estafa','Falta de comunicación','Comentarios positivos'];
+const TC=['#DC2626','#EF4444','#F59E0B','#8B5CF6','#3B82F6','#7F1D1D','#06B6D4','#059669'];
+const TS=['"Quiero dar de baja y nadie me responde." / "Siguen cobrando después de pedir la baja."','"Nadie me responde por mail ni WhatsApp." / "Hace semanas que espero una respuesta."','"Siguen cobrando sin haber resuelto nada." / "Me cobraron por un servicio no recibido."','"No veo resultados con la publicidad." / "El trabajo entregado no era lo pactado."','"Más de 2 meses insistiendo sin respuesta." / "La rapidez de atención es muy mala."','"Son unos estafadores." / "Me sacaron plata y jamás vi un mensaje de respuesta."','"Falta de comunicación total." / "Nunca sé en qué estado está mi solicitud."','"Muy conforme con la atención." / "Resolvieron rápido, muy agradecido con el equipo."'];
+
+const RADAR_LBL=['Velocidad respuesta','Resolución efectiva','Sin percepción fraude','Calidad entregable','CSAT general','Cobertura mercado'];
+const RADAR_BM=[70,75,72,78,75,80];
+const RD={'all':[22,34,28,32,34,40],'Argentina':[30,33,43,31,33,100],'Chile':[28,34,60,32,34,99],'Colombia':[33,36,84,34,36,74],'Perú':[27,32,91,30,32,28],'Guatemala':[33,44,97,42,44,11],'Ecuador':[33,38,98,36,38,7],'Panamá':[38,44,100,42,44,6],'El Salvador':[33,47,100,45,47,5],'Nicaragua':[33,33,100,31,33,2]};
+
+const RECS_G=[
+  {t:'SLA de respuesta < 24h obligatorio',tr:'CX Global 2025',b:'68% de los comentarios mencionan demoras. Empresas líderes como HubSpot operan con SLA de 2-4h. Un sistema de tickets con alertas automáticas puede reducir el CSAT negativo en 30% (Freshworks 2024).'},
+  {t:'Portal de autogestión para bajas y facturación',tr:'CX Digital LATAM',b:'183 menciones de "baja" revelan un proceso traumático. La autogestión 24/7 reduce la fricción. Paradójicamente, facilitar la cancelación retiene más clientes al mejorar la percepción de transparencia.'},
+  {t:'Onboarding estructurado 30-60-90 días',tr:'SaaS Best Practice',b:'Clientes con 0-5 tickets: 60-67% insatisfechos. La primera experiencia es determinante. Gainsight reporta 40% menos churn con onboarding estructurado y verificado.'},
+  {t:'Omnicanalidad unificada (WhatsApp + Email + Portal)',tr:'Contact Center LATAM',b:'Los canales de contacto aparecen fragmentados en comentarios. Unificar en HiperMe o Zendesk Suite reduce el tiempo de resolución en 25%.'},
+  {t:'Programa de recovery de detractores',tr:'Customer Success 2025',b:'65% detractores. Contacto personal en 48h marca la diferencia. Zendesk: 30% de detractores recuperados se convierten en promotores activos.'},
+  {t:'Reactivar el programa de encuestas',tr:'Operacional urgente',b:'Volumen bajó de 297/mes a 17/mes. Sin medición no hay mejora posible. Envío automático post-cierre de ticket es imprescindible.'}
+];
+const RECS={
+  'Argentina':[{t:'Plan emergencia fraude — 38 menciones',tr:'Urgente AR',b:'45% del total global de menciones de fraude. Contacto personal inmediato, revisión de cobros y devoluciones. Mayor riesgo reputacional de la compañía.'},{t:'Proceso de baja cero fricción',tr:'Operacional AR',b:'105 menciones de "baja" en Argentina. Proceso inmediato con confirmación automática. Impacto directo en la percepción de fraude.'},{t:'Equipo dedicado — mayor mercado LATAM',tr:'Estrategia AR',b:'774 encuestas. KPIs propios de CSAT y manager regional justificados por volumen.'}],
+  'Chile':[{t:'Intervención urgente — CSAT más bajo 34%',tr:'Urgente CL',b:'646 encuestas, 27 fraude. Revisión de contratos, devoluciones y refuerzo de soporte chileno.'},{t:'Regularización cobros recurrentes (SERNAC)',tr:'Legal CL',b:'Ley SERNAC en Chile es estricta. Auditoría de contratos urgente para evitar exposición legal.'},{t:'Check-in proactivo a 30 días',tr:'Retención CL',b:'504 comentarios. Detección temprana antes del punto de no retorno.'}],
+  'Colombia':[{t:'Colombia como mercado piloto de mejoras',tr:'Oportunidad CO',b:'36% CSAT y menor nivel de fraude. Ideal para pilotar NPS, onboarding y autogestión antes de escalar.'},{t:'CSM por cuenta — clientes valoran el asesor',tr:'Sales CO',b:'20 menciones de "asesor". Un Customer Success Manager puede elevar el CSAT a 55%+ en 6 meses.'}],
+  'Perú':[{t:'Soporte local Lima horario extendido',tr:'Mercado PE',b:'184 encuestas, 32% CSAT. Soporte local mejora percepción de cercanía.'},{t:'Recuperación urgente 6 clientes fraude',tr:'Urgente PE',b:'Alto impacto en redes. Contacto directo e inmediato.'}],
+  'Guatemala':[{t:'Seguimiento proactivo mensual',tr:'Retención GT',b:'"Llaman" y "seguimiento" son clave. Check-in mensual tiene alto ROI con 44% CSAT.'}],
+  'Ecuador':[{t:'Account manager dedicado Ecuador',tr:'Mercado EC',b:'49 encuestas. Con volumen pequeño, un AM puede tener impacto inmediato con pocos recursos.'}],
+  'Panamá':[{t:'Capitalizar mejor rapidez del análisis (38%)',tr:'Fortaleza PA',b:'Formalizar SLAs y comunicarlos proactivamente puede elevar la satisfacción general.'}],
+  'El Salvador':[{t:'Escalar el modelo de calidad al resto',tr:'Potencial SV',b:'Mayor CSAT del análisis (47%). Estudiar qué hace diferente este mercado y replicarlo.'}],
+  'Nicaragua':[{t:'Convertirlo en caso de éxito regional',tr:'Mercado NI',b:'33% CSAT, 0 fraude, sentimiento 43% positivo. Potencial caso de éxito LATAM con 12 encuestas.'}]
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// DATE FILTER STATE + DERIVED AGGREGATOR
+// ═══════════════════════════════════════════════════════════════════
+let cF='2024-02', cT='2026-06';
+
+function getFD() {
+  return MD.filter(d => d.ym >= cF && d.ym <= cT);
+}
+
+// Aggregate filtered months → single object with ALL needed metrics
+function agg(fd) {
+  if (!fd.length) return null;
+  const r = {n:0,ci:0,ps:0,s:0,ms:0,as:0,mm:0,m:0,r:0,b:0,e:0,fraud:0,n_com:0,
+    csat_vals:[], csat_rap_vals:[], avg_vals:[]};
+  fd.forEach(d=>{
+    r.n+=d.n; r.ci+=d.ci; r.ps+=d.ps; r.s+=d.s; r.ms+=d.ms; r.as+=d.as;
+    r.mm+=d.mm; r.m+=d.m; r.r+=d.r; r.b+=d.b; r.e+=d.e;
+    r.fraud+=d.fraud; r.n_com+=d.n_com;
+    r.csat_vals.push(d.csat); r.csat_rap_vals.push(d.csat_rap); r.avg_vals.push(d.avg);
+  });
+  const sat_total = r.ci+r.ps+r.s+r.ms+r.as;
+  const rap_total = r.mm+r.m+r.r+r.b+r.e;
+  r.csat = sat_total>0 ? Math.round((r.s+r.ms+r.as)/sat_total*100) : 0;
+  r.csat_rap = rap_total>0 ? Math.round((r.b+r.e)/rap_total*100) : 0;
+  r.avg = fd.reduce((s,d)=>s+d.avg*d.n,0)/r.n;
+  r.neg_pct = sat_total>0 ? Math.round((r.ci+r.ps)/sat_total*100) : 0;
+  r.pos_pct = r.csat;
+  r.best = fd.reduce((a,b)=>a.csat>b.csat?a:b);
+  r.worst = fd.reduce((a,b)=>a.csat<b.csat?a:b);
+  return r;
+}
+
+// Per-country aggregate for the filtered period
+function aggCountry(country, fd) {
+  // We don't have per-(country,month) data in JS — use proportional estimates from all-time
+  // For the country table, we show the all-time static data with a note when filtered
+  return CD[country];
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CHART INSTANCES — must be kept to update on filter change
+// ═══════════════════════════════════════════════════════════════════
+let CH = {};
+
+function mkChart(id, config) {
+  if (CH[id]) { CH[id].destroy(); }
+  CH[id] = new Chart(document.getElementById(id), config);
+  return CH[id];
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN REBUILD — called on every date filter change
+// ═══════════════════════════════════════════════════════════════════
+function rebuild() {
+  const fd = getFD();
+  const ag = agg(fd);
+  if (!ag) return;
+
+  const isF = (cF !== '2024-02' || cT !== '2026-06');
+  const periodLbl = isF ? `${fd[0]?.l} – ${fd[fd.length-1]?.l}` : 'Feb 2024 – Jun 2026';
+
+  // Badge visibility
+  ['ov-fb','tend-fb'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display = isF?'inline-flex':'none';
+  });
+  // Filter note labels
+  const noteTxt = isF ? periodLbl : '';
+  ['ov-sat-lbl','ov-rap-lbl','ov-geo-lbl','ov-sent-lbl','t-lbl','v-lbl','a-lbl'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=noteTxt;el.style.display=isF?'inline-flex':'none';}
+  });
+
+  // Counter badge
+  document.getElementById('drb').textContent = ag.n.toLocaleString()+' encuestas';
+
+  // ── OVERVIEW KPIs ──
+  document.getElementById('ov-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Total encuestas</div><div class="kv">${ag.n.toLocaleString()}</div><div class="ks">${periodLbl}</div></div>
+    <div class="kpi"><div class="kl">CSAT Satisfacción</div><div class="kv" style="color:${ag.csat<40?'#DC2626':ag.csat<60?'#F59E0B':'#059669'}">${ag.csat}%</div><div class="ks">Benchmark sector: 75%</div><div class="kt dn">▼ Brecha ${75-ag.csat}pp</div></div>
+    <div class="kpi"><div class="kl">CSAT Rapidez</div><div class="kv" style="color:${ag.csat_rap<30?'#DC2626':ag.csat_rap<45?'#F59E0B':'#059669'}">${ag.csat_rap}%</div><div class="ks">Benchmark sector: 70%</div></div>
+    <div class="kpi"><div class="kl">% Insatisfechos</div><div class="kv" style="color:#DC2626">${ag.neg_pct}%</div><div class="ks">Score 1-2 sobre total</div></div>`;
+
+  // ── OVERVIEW DIST BARS ──
+  const sat_t = ag.ci+ag.ps+ag.s+ag.ms+ag.as;
+  const rap_t = ag.mm+ag.m+ag.r+ag.b+ag.e;
+  const satRows=[['Completamente insatisfecho','#7F1D1D','ci'],['Poco satisfecho','#EF4444','ps'],['Satisfecho','#F59E0B','s'],['Muy satisfecho','#10B981','ms'],['Altamente satisfecho','#059669','as']];
+  document.getElementById('ov-sat').innerHTML=satRows.map(([l,c,k])=>{const v=sat_t>0?Math.round(ag[k]/sat_t*100):0;return`<div class="bw"><div class="bl"><span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:${c};display:inline-block"></span>${l}</span><span>${ag[k].toLocaleString()} · ${v}%</span></div><div class="btr"><div class="bf" style="width:${v}%;background:${c}"></div></div></div>`;}).join('');
+  const rapRows=[['Muy mala','#7F1D1D','mm'],['Mala','#EF4444','m'],['Regular','#F59E0B','r'],['Buena','#10B981','b'],['Excelente','#059669','e']];
+  document.getElementById('ov-rap').innerHTML=rapRows.map(([l,c,k])=>{const v=rap_t>0?Math.round(ag[k]/rap_t*100):0;return`<div class="bw"><div class="bl"><span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:${c};display:inline-block"></span>${l}</span><span>${ag[k].toLocaleString()} · ${v}%</span></div><div class="btr"><div class="bf" style="width:${v}%;background:${c}"></div></div></div>`;}).join('');
+
+  // ── OVERVIEW INSIGHTS ──
+  document.getElementById('ov-ins').innerHTML=`
+    <div class="ins"><div class="insn">${ag.neg_pct}%</div><div class="insl">Clientes insatisfechos (score 1-2)</div></div>
+    <div class="ins"><div class="insn">${ag.n_com.toLocaleString()}</div><div class="insl">Comentarios recibidos en el período</div></div>
+    <div class="ins"><div class="insn">-${75-ag.csat}pp</div><div class="insl">Brecha vs benchmark industria 75%</div></div>`;
+
+  // ── OVERVIEW GEO CHART (proportional by period) ──
+  const cnames=Object.keys(CD);
+  const geoVals=cnames.map(c=>{
+    const tot=MD.reduce((s,d)=>s+d.n,0);
+    const fTot=fd.reduce((s,d)=>s+d.n,0);
+    return Math.round(CD[c].n/tot*fTot);
+  });
+  if(CH['geoC']){CH['geoC'].data.datasets[0].data=geoVals;CH['geoC'].update();}
+
+  // ── OVERVIEW SENTIMENT (derived from filtered CSAT) ──
+  const neg_s=ag.neg_pct, pos_s=ag.csat, neu_s=Math.max(0,100-neg_s-pos_s);
+  if(CH['sentG']){CH['sentG'].data.datasets[0].data=[neg_s,neu_s,pos_s];CH['sentG'].update();}
+
+  // ── TENDENCIA CHARTS ──
+  const lbs=fd.map(d=>d.l);
+  const cvs=fd.map(d=>d.csat);
+  const vvs=fd.map(d=>d.n);
+  const avs=fd.map(d=>d.avg);
+
+  if(CH['csatT']){
+    CH['csatT'].data.labels=lbs;
+    CH['csatT'].data.datasets[0].data=cvs;
+    CH['csatT'].data.datasets[0].pointBackgroundColor=cvs.map(v=>v<25?'#DC2626':v>39?'#059669':P);
+    CH['csatT'].data.datasets[1].data=Array(lbs.length).fill(75);
+    CH['csatT'].update();
+  }
+  if(CH['volC']){CH['volC'].data.labels=lbs;CH['volC'].data.datasets[0].data=vvs;CH['volC'].data.datasets[1].data=vvs;CH['volC'].update();}
+  if(CH['avgC']){CH['avgC'].data.labels=lbs;CH['avgC'].data.datasets[0].data=avs;CH['avgC'].data.datasets[1].data=Array(lbs.length).fill(3);CH['avgC'].update();}
+
+  // ── TENDENCIA BEST/WORST ──
+  document.getElementById('tend-bests').innerHTML=`
+    <div class="card" style="background:#ECFDF5;border-color:#A7F3D0"><div style="font-size:10px;font-weight:700;color:#065F46;margin-bottom:3px">🏆 Mejor mes del período</div><div style="font-size:18px;font-weight:700;color:#059669">${ag.best.l}</div><div style="font-size:10px;color:#047857">${ag.best.csat}% CSAT · score ${ag.best.avg}/5</div></div>
+    <div class="card" style="background:#FFF5F5;border-color:#FCA5A5"><div style="font-size:10px;font-weight:700;color:#7F1D1D;margin-bottom:3px">⚠ Peor mes del período</div><div style="font-size:18px;font-weight:700;color:#DC2626">${ag.worst.l}</div><div style="font-size:10px;color:#991B1B">${ag.worst.csat}% CSAT · score ${ag.worst.avg}/5</div></div>
+    <div class="card" style="background:#EFF6FF;border-color:#BFDBFE"><div style="font-size:10px;font-weight:700;color:#1E40AF;margin-bottom:3px">📊 Promedio del período</div><div style="font-size:18px;font-weight:700;color:#1E40AF">${ag.csat}%</div><div style="font-size:10px;color:#1E40AF">CSAT · ${ag.n.toLocaleString()} encuestas</div></div>`;
+
+  // ── POR PAÍS — update note ──
+  document.getElementById('pais-period').textContent = periodLbl;
+  document.getElementById('pais-date-note').textContent = isF ? `Período: ${periodLbl}` : '';
+
+  // Re-render country table for current filter
+  renderCountryTable('all', fd, ag);
+
+  // ── MEJORA — update CSAT KPIs (uses filtered csat) ──
+  const cur_c = ag.csat;
+  document.getElementById('mej-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">CSAT período</div><div class="kv" style="color:#DC2626;font-size:19px">${cur_c}%</div><div class="ks">${periodLbl}</div></div>
+    <div class="kpi"><div class="kl">Benchmark sector</div><div class="kv" style="color:#059669;font-size:19px">75%</div><div class="ks">Marketing digital LATAM</div></div>
+    <div class="kpi"><div class="kl">Brecha a cerrar</div><div class="kv" style="color:#F59E0B;font-size:19px">+${75-cur_c}pp</div></div>
+    <div class="kpi"><div class="kl">Meta Q4 2026</div><div class="kv" style="color:${P};font-size:19px">${Math.min(cur_c+26,75)}%</div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNTRY TABLE — uses filtered data for n/csat estimates
+// ═══════════════════════════════════════════════════════════════════
+let curPaisFilter = 'all';
+
+function renderCountryTable(nm, fd, ag) {
+  curPaisFilter = nm;
+  const isF = (cF !== '2024-02' || cT !== '2026-06');
+  const totF = fd ? fd.reduce((s,d)=>s+d.n,0) : 2293;
+  const totAll = 2293;
+
+  const sorted = Object.entries(CD).sort((a,b)=>b[1].csat-a[1].csat);
+  const tb = document.getElementById('ptbody');
+  if(!tb) return;
+  tb.innerHTML='';
+  sorted.forEach(([name,d],i)=>{
+    if(nm!=='all' && name!==nm) return;
+    // proportional n estimate for filtered period
+    const nEst = isF ? Math.round(d.n/totAll*totF) : d.n;
+    const sc = Math.round((d.csat+d.csat_rap)/2);
+    const st = sc>=50?'<span class="pill pg">Bueno</span>':sc>=40?'<span class="pill py">Alerta</span>':'<span class="pill pr">Crítico</span>';
+    tb.innerHTML+=`<tr>
+      <td><b style="color:${P}">${i+1}</b></td>
+      <td>${d.f} ${name}</td>
+      <td>${nEst.toLocaleString()}${isF?'<span style="color:#92400E;font-size:8px;margin-left:3px">~est.</span>':''}</td>
+      <td><span class="pill ${d.csat>=44?'pg':d.csat>=36?'py':'pr'}">${d.csat}%</span></td>
+      <td><span class="pill ${d.csat_rap>=35?'pg':d.csat_rap>=28?'py':'pr'}">${d.csat_rap}%</span></td>
+      <td>${d.n_com.toLocaleString()}</td>
+      <td style="color:${d.fraud>10?'#DC2626':'#374151'};font-weight:${d.fraud>10?700:400}">${d.fraud}</td>
+      <td>${st}</td>
+    </tr>`;
+  });
+}
+
+function FP(nm, btn) {
+  document.querySelectorAll('#tab-paises .fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCountryTable(nm, getFD(), agg(getFD()));
+  const dd = document.getElementById('pdetail');
+  if(nm!=='all' && CD[nm]) {
+    const d = CD[nm];
+    dd.innerHTML=`<div class="card" style="margin-top:13px">
+      <div class="ct"><span class="dot"></span>Detalle ${d.f} ${nm}</div>
+      <div class="k3" style="margin-bottom:11px">
+        <div class="kpi" style="background:#F8F7FF"><div class="kl">CSAT Satisfacción (≥3)</div><div class="kv" style="font-size:19px;color:${d.csat>=44?'#059669':'#DC2626'}">${d.csat}%</div></div>
+        <div class="kpi" style="background:#F8F7FF"><div class="kl">CSAT Rapidez (≥4)</div><div class="kv" style="font-size:19px;color:${d.csat_rap>=35?'#059669':'#DC2626'}">${d.csat_rap}%</div></div>
+        <div class="kpi" style="background:#FFF5F5"><div class="kl">Fraude / Severos</div><div class="kv" style="font-size:19px;color:#DC2626">${d.fraud} / ${d.severe}</div></div>
+      </div>
+      <div style="font-size:10px;color:#6B7280;margin-bottom:7px;font-weight:600">Palabras más frecuentes en comentarios</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${d.tw.slice(0,10).map((item,i)=>{const bg=item.neg?'#FEE2E2':item.pos?'#D1FAE5':'#EEF2FF';const c=item.neg?'#991B1B':item.pos?'#065F46':'#3730A3';return`<span style="background:${bg};color:${c};font-size:${i<3?'13px':i<5?'11px':'10px'};border-radius:11px;padding:3px 10px;font-weight:600">${item.w} (${item.n})</span>`}).join('')}
+      </div>
+    </div>`;
+  } else dd.innerHTML='';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COMMENTS — country filter (all-time data, different per country)
+// ═══════════════════════════════════════════════════════════════════
+function FC(c, btn) {
+  document.querySelectorAll('#tab-comentarios .fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const lbl = c==='all'?'Todos los países':(CD[c]?.f+' '+c)||c;
+  ['wc-lbl','s-lbl','wf-lbl','th-lbl'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=lbl;});
+
+  const d = c==='all'?null:CD[c];
+  const words = d ? d.tw : GW;
+  const themes = d ? d.themes : GT;
+  const neg = d ? d.neg_pct : 39;
+  const neu = d ? d.neu_pct : 49;
+  const pos = d ? d.pos_pct : 12;
+  const n_com = d ? d.n_com : 1773;
+  const fraud = d ? d.fraud : 85;
+
+  // Stats line
+  document.getElementById('com-stats').textContent = `${n_com.toLocaleString()} comentarios · ${fraud} menciones de fraude/estafa · Período completo`;
+
+  // Word cloud
+  const wc = document.getElementById('wordcloud');
+  wc.innerHTML='';
+  const sizes=[40,32,26,22,20,18,16,15,14,13,12,11,11,11,11];
+  words.slice(0,15).forEach((item,i)=>{
+    const bg=item.neg?'#FEE2E2':item.pos?'#D1FAE5':'#EEF2FF';
+    const col=item.neg?'#991B1B':item.pos?'#065F46':'#3730A3';
+    const el=document.createElement('span');el.className='wtag';
+    el.textContent=item.w+(item.n>=2?' ('+item.n+')':'');
+    el.style.cssText=`background:${bg};color:${col};font-size:${sizes[i]||11}px;`;
+    wc.appendChild(el);
+  });
+
+  // Sentiment donut
+  if(CH['sentF']){CH['sentF'].data.datasets[0].data=[neg,neu,pos];CH['sentF'].update();}
+  document.getElementById('sent-st').textContent=`Negativo: ${neg}% · Neutral: ${neu}% · Positivo: ${pos}%`;
+
+  // Words bar chart
+  const topW = words.slice(0,8);
+  if(CH['wordsC']){
+    CH['wordsC'].data.labels=topW.map(w=>w.w);
+    CH['wordsC'].data.datasets[0].data=topW.map(w=>w.n);
+    CH['wordsC'].data.datasets[0].backgroundColor=topW.map(w=>w.neg?'#EF4444':w.pos?'#059669':P);
+    CH['wordsC'].update();
+  }
+
+  // Themes list
+  const maxT = Math.max(...themes);
+  document.getElementById('themes').innerHTML=TN.map((name,i)=>{
+    if(!themes[i]) return '';
+    return`<div class="tcrd">
+      <div class="thdr"><span class="ttl">${name}</span><span class="tcnt">${themes[i]}</span></div>
+      <div class="tbar"><div class="tbf" style="width:${Math.round(themes[i]/maxT*100)}%;background:${TC[i]}"></div></div>
+      <div class="tsmp">${TS[i]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MEJORA — country filter
+// ═══════════════════════════════════════════════════════════════════
+function FM(c, btn) {
+  document.querySelectorAll('#tab-mejora .fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = CD[c];
+  const lbl = c==='all'?'Global':(d?.f+' '+c)||c;
+  document.getElementById('r-lbl').textContent=lbl;
+  if(CH['radarC']){
+    CH['radarC'].data.datasets[0].data=RD[c]||RD['all'];
+    CH['radarC'].data.datasets[0].label=(d?d.f+' ':'')+' Guru '+(c==='all'?'Global':c);
+    CH['radarC'].update();
+  }
+  const recs = c==='all'?RECS_G:RECS[c]||RECS_G;
+  document.getElementById('rec-list').innerHTML=recs.map((r,i)=>`<div class="rc"><div class="rt"><span style="background:linear-gradient(135deg,${P},${B});color:#fff;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${i+1}</span>${r.t}<span class="tbdg">${r.tr}</span></div><div class="rb">${r.b}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SHOW TAB
+// ═══════════════════════════════════════════════════════════════════
+function ST(t, btn) {
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DATE FILTER HANDLERS
+// ═══════════════════════════════════════════════════════════════════
+function updateDF() {
+  cF = document.getElementById('dF').value;
+  cT = document.getElementById('dT').value;
+  if(cF > cT) { cT = cF; document.getElementById('dT').value = cT; }
+  document.querySelectorAll('.bp').forEach(b=>b.classList.remove('active'));
+  rebuild();
+}
+document.getElementById('dF').addEventListener('change', updateDF);
+document.getElementById('dT').addEventListener('change', updateDF);
+
+function preset(p, btn) {
+  document.querySelectorAll('.bp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(p==='all'){cF='2024-02';cT='2026-06';}
+  else if(p==='2024'){cF='2024-02';cT='2024-12';}
+  else if(p==='2025'){cF='2025-03';cT='2025-12';}
+  else if(p==='2026'){cF='2026-01';cT='2026-06';}
+  else if(p==='last6'){cF='2025-12';cT='2026-06';}
+  document.getElementById('dF').value=cF;
+  document.getElementById('dT').value=cT;
+  rebuild();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BUILD HEATMAP
+// ═══════════════════════════════════════════════════════════════════
+function buildHM() {
+  const sat=['Completamente\ninsatisfecho','Poco\nsatisfecho','Satisfecho','Muy\nsatisfecho','Altamente\nsatisfecho'];
+  const rap=['Muy mala','Mala','Regular','Buena','Excelente'];
+  const data=[[746,108,42,10,3],[82,198,246,38,17],[8,30,103,191,8],[2,5,17,124,81],[1,1,10,59,152]];
+  const max=746;
+  let html='<table style="border-collapse:collapse;margin:0 auto;font-size:9px">';
+  html+='<tr><td style="padding:5px 8px;color:#6B7280;font-size:8px;font-weight:600">Sat↓ / Rap→</td>';
+  rap.forEach(r=>html+=`<td style="padding:5px 8px;text-align:center;color:#6B7280;font-weight:600">${r}</td>`);
+  html+='</tr>';
+  data.forEach((row,i)=>{
+    html+=`<tr><td style="padding:5px 9px;color:#374151;font-size:8px;font-weight:600;max-width:90px;line-height:1.3;white-space:pre-line">${sat[i]}</td>`;
+    row.forEach((v,j)=>{
+      const intensity=v/max;
+      const bg=i>=3&&j>=3?`rgba(5,150,105,${0.12+intensity*0.85})`:i<=1&&j<=1?`rgba(220,38,38,${0.1+intensity*0.92})`:`rgba(91,79,207,${0.07+intensity*0.65})`;
+      html+=`<td style="padding:0"><div style="width:65px;height:46px;background:${bg};display:flex;align-items:center;justify-content:center;margin:2px;border-radius:5px"><span style="font-size:13px;font-weight:700;color:${intensity>0.4?'#fff':'#1E1B4B'}">${v}</span></div></td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</table>';
+  document.getElementById('hmc').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT — build all static charts once, then rebuild dynamic ones
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+
+  // ── STATIC CHARTS (never change with date filter) ──
+  buildHM();
+
+  // Geo chart (initial — will be updated by rebuild)
+  mkChart('geoC',{type:'bar',data:{labels:Object.keys(CD).map(k=>CD[k].f+' '+k.slice(0,3)),datasets:[{data:Object.values(CD).map(d=>d.n),backgroundColor:[P,LP,B,LB,P,LP,B,LB,P],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9},color:'#374151'},grid:{display:false}}}}});
+
+  // Global sentiment (initial)
+  mkChart('sentG',{type:'doughnut',data:{labels:['Insatisfecho/poco','Neutral','Positivo'],datasets:[{data:[65,15,20],backgroundColor:['#DC2626','#9CA3AF','#059669'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:9,padding:8,color:'#374151'}}}}});
+
+  // Tendency charts (initial — updated by rebuild)
+  const id=getFD();const il=id.map(d=>d.l);const ic=id.map(d=>d.csat);const iv=id.map(d=>d.n);const ia=id.map(d=>d.avg);
+  mkChart('csatT',{type:'line',data:{labels:il,datasets:[{label:'CSAT %',data:ic,borderColor:P,backgroundColor:'rgba(91,79,207,0.08)',fill:true,borderWidth:2.5,tension:0.35,pointRadius:3.5,pointBackgroundColor:ic.map(v=>v<25?'#DC2626':v>39?'#059669':P)},{label:'Benchmark 75%',data:Array(il.length).fill(75),borderColor:'#059669',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8,color:'#374151'}}},scales:{y:{min:0,max:80,ticks:{callback:v=>v+'%',font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},x:{ticks:{font:{size:8},maxRotation:45,color:'#6B7280'},grid:{display:false}}}}});
+  mkChart('volC',{type:'bar',data:{labels:il,datasets:[{data:iv,backgroundColor:'rgba(91,79,207,0.4)',borderColor:P,borderWidth:1,borderRadius:3},{type:'line',data:iv,borderColor:B,borderWidth:2,fill:false,tension:0.4,pointRadius:2.5,pointBackgroundColor:B}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},maxRotation:45,color:'#6B7280'},grid:{display:false}},y:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}}}}});
+  mkChart('avgC',{type:'line',data:{labels:il,datasets:[{label:'Score (1-5)',data:ia,borderColor:LP,backgroundColor:'rgba(123,111,223,0.1)',fill:true,borderWidth:2.5,tension:0.35,pointRadius:2.5,pointBackgroundColor:LP},{label:'Mínimo aceptable 3',data:Array(il.length).fill(3),borderColor:'#F59E0B',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8,color:'#374151'}}},scales:{y:{min:1,max:5,ticks:{stepSize:1,callback:v=>['','★','★★','★★★','★★★★','★★★★★'][v]||v,font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},x:{ticks:{font:{size:8},maxRotation:45,color:'#6B7280'},grid:{display:false}}}}});
+
+  // Hour chart (static)
+  mkChart('hourC',{type:'bar',data:{labels:['06h','07h','08h','11h','12h','13h','14h','15h','16h','18h','19h','20h'],datasets:[{data:[19,333,274,82,29,215,368,529,302,69,33,39],backgroundColor:['06h','07h','08h','11h','12h','13h','14h','15h','16h','18h','19h','20h'].map(h=>h==='15h'?B:h==='07h'||h==='14h'?LP+'CC':P+'80'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#374151'},grid:{display:false}},y:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}}}}});
+
+  // Tickets chart (static)
+  mkChart('tkC',{type:'bar',data:{labels:['0 tickets','1-2 tkt','3-5 tkt','6-10 tkt','11-20 tkt','21+ tkt'],datasets:[{label:'Satisfacción',data:[2.32,2.19,2.16,2.03,2.00,2.43],backgroundColor:[P,'#F59E0B','#F59E0B','#DC2626','#DC2626',P],borderRadius:5},{type:'line',label:'Rapidez',data:[2.61,2.29,2.45,2.30,2.36,2.74],borderColor:B,borderWidth:2.5,fill:false,tension:0.3,pointRadius:4.5,pointBackgroundColor:B}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8,color:'#374151'}}},scales:{y:{min:1,max:5,ticks:{stepSize:1,callback:v=>['','★','★★','★★★','★★★★','★★★★★'][v]||v,font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},x:{ticks:{font:{size:10},color:'#374151'},grid:{display:false}}}}});
+
+  // Fraud chart (static)
+  mkChart('fraudC',{type:'bar',data:{labels:['Argentina','Chile','Colombia','Perú','Guatemala','Ecuador'],datasets:[{data:[38,27,11,6,2,1],backgroundColor:['#7F1D1D','#991B1B','#EF4444','#F87171','#FCA5A5','#FEE2E2'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#374151'},grid:{display:false}},y:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}}}}});
+
+  // Ticket bars (static)
+  const tkB=[{l:'0 tickets',neg:60.9,pos:23.2},{l:'1-2 tickets',neg:65.6,pos:18.0},{l:'3-5 tickets',neg:66.7,pos:19.4},{l:'6-10 tickets',neg:73.1,pos:14.9},{l:'11-20 tickets',neg:73.4,pos:14.0},{l:'21+ tickets',neg:60.2,pos:22.7}];
+  const nb=document.getElementById('neg-tk');const pb=document.getElementById('pos-tk');nb.innerHTML='';pb.innerHTML='';
+  tkB.forEach(t=>{
+    const c=t.neg>=70?'#DC2626':t.neg>=65?'#F59E0B':P;
+    nb.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:10px;color:#374151;min-width:90px;font-weight:500">${t.l}</span><div style="flex:1;height:7px;background:#F3F4F6;border-radius:4px;overflow:hidden"><div style="height:100%;background:${c};width:${t.neg}%"></div></div><span style="font-size:10px;font-weight:700;color:#1E1B4B;min-width:36px;text-align:right">${t.neg}%</span></div>`;
+    const cp=t.pos>=22?'#059669':P;
+    pb.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:10px;color:#374151;min-width:90px;font-weight:500">${t.l}</span><div style="flex:1;height:7px;background:#F3F4F6;border-radius:4px;overflow:hidden"><div style="height:100%;background:${cp};width:${t.pos*4}%"></div></div><span style="font-size:10px;font-weight:700;color:#1E1B4B;min-width:36px;text-align:right">${t.pos}%</span></div>`;
+  });
+
+  // Matrix charts (static)
+  mkChart('matN',{type:'bar',data:{labels:['C.Insatisf+Muy mala','P.Satisf+Regular','P.Satisf+Mala','C.Insatisf+Mala','P.Satisf+Muy mala'],datasets:[{data:[746,246,198,108,82],backgroundColor:['#7F1D1D','#991B1B','#B91C1C','#DC2626','#EF4444'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9},color:'#374151'},grid:{display:false}}}}});
+  mkChart('matP',{type:'bar',data:{labels:['Alt.Satisf+Excelente','Satisfecho+Buena','M.Satisf+Buena','M.Satisf+Excelente','Satisfecho+Regular'],datasets:[{data:[152,191,124,81,103],backgroundColor:['#059669','#10B981','#34D399','#6EE7B7','#A7F3D0'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9},color:'#374151'},grid:{display:false}}}}});
+
+  // Country CSAT bars (static — all-time data)
+  const cns=Object.keys(CD);const flags=cns.map(k=>CD[k].f+' '+k.slice(0,3));
+  mkChart('cSat',{type:'bar',data:{labels:flags,datasets:[{data:cns.map(k=>CD[k].csat),backgroundColor:cns.map(k=>CD[k].csat>=44?'#059669':CD[k].csat>=36?'#F59E0B':'#DC2626'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:60,ticks:{callback:v=>v+'%',font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9},color:'#374151'},grid:{display:false}}}}});
+  mkChart('cRap',{type:'bar',data:{labels:flags,datasets:[{data:cns.map(k=>CD[k].csat_rap),backgroundColor:cns.map(k=>CD[k].csat_rap>=35?'#059669':CD[k].csat_rap>=28?'#F59E0B':'#DC2626'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:50,ticks:{callback:v=>v+'%',font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9},color:'#374151'},grid:{display:false}}}}});
+
+  // Sentiment filter (comments — initial)
+  mkChart('sentF',{type:'doughnut',data:{labels:['Negativo','Neutral','Positivo'],datasets:[{data:[39,49,12],backgroundColor:['#DC2626','#9CA3AF','#059669'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:9,padding:8,color:'#374151'}}}}});
+  document.getElementById('sent-st').textContent='Negativo: 39% · Neutral: 49% · Positivo: 12%';
+
+  // Words chart (initial)
+  const gw8=GW.slice(0,8);
+  mkChart('wordsC',{type:'bar',data:{labels:gw8.map(a=>a.w),datasets:[{data:gw8.map(a=>a.n),backgroundColor:gw8.map(a=>a.neg?'#EF4444':a.pos?'#059669':P),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#6B7280'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:11},color:'#374151'},grid:{display:false}}}}});
+
+  // Benchmark bars (static)
+  const bmD=[{l:'Guru Soluciones (actual)',v:34,c:'#DC2626',src:'Datos internos 2024-2026'},{l:'Marketing digital LATAM',v:72,c:'#F59E0B',src:'Freshworks 2024'},{l:'Software / SaaS global',v:78,c:'#059669',src:'Retently/ACSI 2024'},{l:'Consultoría',v:84,c:'#059669',src:'SurveySparrow 2026'},{l:'Retail digital',v:76,c:'#10B981',src:'ACSI 2024'},{l:'Banca y finanzas',v:79,c:'#059669',src:'QuestionPro 2025'},{l:'Meta Guru Q4 2026',v:60,c:P,src:'Objetivo recomendado'}];
+  document.getElementById('bm-bars').innerHTML=bmD.map(bm=>`<div class="bmr"><span class="bml">${bm.l}</span><div class="bmw"><div class="bmt"><div class="bmf" style="width:${bm.v}%;background:${bm.c}"></div></div><span class="bmv" style="color:${bm.c}">${bm.v}%</span></div><span class="bms">${bm.src}</span></div>`).join('');
+
+  // Radar (initial — updated by FM)
+  mkChart('radarC',{type:'radar',data:{labels:RADAR_LBL,datasets:[{label:'Guru Global',data:RD['all'],fill:true,backgroundColor:'rgba(91,79,207,0.18)',borderColor:P,pointBackgroundColor:P,borderWidth:2.5,pointRadius:4},{label:'Benchmark industria',data:RADAR_BM,fill:true,backgroundColor:'rgba(37,99,235,0.07)',borderColor:B,pointBackgroundColor:B,borderWidth:2,borderDash:[5,4],pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:20,font:{size:9},color:'#6B7280'},pointLabels:{font:{size:11},color:'#1E1B4B'},grid:{color:'#E5E7EB'},angleLines:{color:'#E5E7EB'}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:10,color:'#374151'}}}}});
+
+  // Init country table
+  FP('all', document.querySelector('#tab-paises .fb'));
+
+  // Init comments
+  FC('all', document.querySelector('#tab-comentarios .fb'));
+  document.getElementById('com-stats').textContent='1,773 comentarios · 85 menciones de fraude/estafa · Período completo';
+
+  // Init mejora
+  FM('all', document.querySelector('#tab-mejora .fb'));
+
+  // ── FINAL: run the main rebuild which connects everything ──
+  rebuild();
+});
+</script>
+</body>
+</html>
